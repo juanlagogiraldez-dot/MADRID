@@ -1,0 +1,26 @@
+name: Fetch Madrid Data
+
+on:
+  schedule:
+    - cron: "0 * * * *"   # cada hora
+  workflow_dispatch:       # permite ejecutarlo a mano desde Actions
+
+jobs:
+  update-dataset:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Descargar JSON
+        run: |
+          curl -L "https://datos.madrid.es/egob/catalogo/206974-0-agenda-eventos-culturales-100.json" -o latest.json
+          curl -L "https://datos.madrid.es/egob/catalogo/206974-0-agenda-eventos-culturales-100.csv" -o latest.csv
+
+      - name: Commit y push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add latest.json latest.csv
+          git commit -m "Update dataset [skip ci]" || echo "No changes"
+          git push
